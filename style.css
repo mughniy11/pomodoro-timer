@@ -130,32 +130,3 @@ button {
 .hidden {
   display: none;
 }
-
-@media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  #name-input {
-    width: 100%;
-  }
-
-  .timer-buttons button {
-    width: 100%;
-    margin: 6px 0;
-  }
-
-  .controls-top {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  select, button {
-    width: 100%;
-  }
-
-  table, textarea {
-    font-size: 0.9rem;
-  }
-}
