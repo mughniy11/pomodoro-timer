@@ -1,6 +1,6 @@
 const timerDisplay = document.getElementById("timer");
 const startBtn = document.getElementById("start");
-const pauseBtn = document.getElementById("pause");
+const pauseResumeBtn = document.getElementById("pause-resume");
 const resetBtn = document.getElementById("reset");
 const durationInput = document.getElementById("duration");
 const alarmSound = document.getElementById("alarm-sound");
@@ -16,6 +16,7 @@ const historyTitle = document.getElementById("history-title");
 let timer;
 let remainingSeconds = durationInput.value * 60;
 let language = languageToggle.value;
+let isPaused = false;
 
 function updateTimerDisplay() {
   const minutes = Math.floor(remainingSeconds / 60);
@@ -32,6 +33,7 @@ function startTimer() {
     } else {
       clearInterval(timer);
       alarmSound.play();
+      stopMusic();
       sessionEndText.classList.remove("hidden");
       sessionEndText.textContent = language === "id" ? "⏰ Sesi sudah habis!" : "⏰ Session ended!";
       const now = new Date();
@@ -46,15 +48,24 @@ function startTimer() {
   }, 1000);
 }
 
-function pauseTimer() {
-  clearInterval(timer);
+function pauseOrResumeTimer() {
+  if (isPaused) {
+    startTimer();
+    pauseResumeBtn.textContent = language === "id" ? "Jeda" : "Pause";
+  } else {
+    clearInterval(timer);
+    pauseResumeBtn.textContent = language === "id" ? "Lanjut" : "Resume";
+  }
+  isPaused = !isPaused;
 }
 
 function resetTimer() {
   clearInterval(timer);
+  isPaused = false;
   remainingSeconds = durationInput.value * 60;
   updateTimerDisplay();
   sessionEndText.classList.add("hidden");
+  pauseResumeBtn.textContent = language === "id" ? "Jeda" : "Pause";
 }
 
 function updateGreeting() {
@@ -69,12 +80,16 @@ function updateDateTime() {
 setInterval(updateDateTime, 1000);
 
 startBtn.addEventListener("click", () => {
+  clearInterval(timer);
   remainingSeconds = durationInput.value * 60;
   updateTimerDisplay();
+  isPaused = false;
+  pauseResumeBtn.textContent = language === "id" ? "Jeda" : "Pause";
   startTimer();
+  playMusic();
 });
 
-pauseBtn.addEventListener("click", pauseTimer);
+pauseResumeBtn.addEventListener("click", pauseOrResumeTimer);
 resetBtn.addEventListener("click", resetTimer);
 nameInput.addEventListener("input", updateGreeting);
 
@@ -87,7 +102,7 @@ languageToggle.addEventListener("change", () => {
   language = languageToggle.value;
   document.getElementById("label-duration").textContent = language === "id" ? "Durasi (menit):" : "Duration (minutes):";
   startBtn.textContent = language === "id" ? "Mulai" : "Start";
-  pauseBtn.textContent = language === "id" ? "Jeda" : "Pause";
+  pauseResumeBtn.textContent = isPaused ? (language === "id" ? "Lanjut" : "Resume") : (language === "id" ? "Jeda" : "Pause");
   resetBtn.textContent = language === "id" ? "Ulang" : "Reset";
   document.getElementById("label-music").textContent = language === "id" ? "🎵 Musik:" : "🎵 Music:";
   document.getElementById("music-none").textContent = language === "id" ? "Tanpa Musik" : "No Music";
@@ -111,9 +126,6 @@ updateDateTime();
 
 const musicSelect = document.getElementById("music-select");
 const musicPlayer = document.getElementById("music-player");
-const addTodoBtn = document.getElementById("add-todo");
-const todoInput = document.getElementById("todo-input");
-const todoList = document.getElementById("todo-list");
 
 function playMusic() {
   const selected = musicSelect.value;
@@ -131,36 +143,9 @@ function stopMusic() {
   musicPlayer.currentTime = 0;
 }
 
-startBtn.addEventListener("click", () => {
-  remainingSeconds = durationInput.value * 60;
-  updateTimerDisplay();
-  startTimer();
-  playMusic(); // Mulai musik saat mulai timer
-});
-
-function startTimer() {
-  clearInterval(timer);
-  timer = setInterval(() => {
-    if (remainingSeconds > 0) {
-      remainingSeconds--;
-      updateTimerDisplay();
-    } else {
-      clearInterval(timer);
-      alarmSound.play();
-      stopMusic(); 
-      sessionEndText.classList.remove("hidden");
-      sessionEndText.textContent = language === "id" ? "⏰ Sesi sudah habis!" : "⏰ Session ended!";
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const duration = durationInput.value;
-      const historyItem = document.createElement("li");
-      historyItem.textContent = language === "id"
-        ? `Selesai pada ${timeStr} - ${duration} menit`
-        : `Finished at ${timeStr} - ${duration} minutes`;
-      historyList.appendChild(historyItem);
-    }
-  }, 1000);
-}
+const addTodoBtn = document.getElementById("add-todo");
+const todoInput = document.getElementById("todo-input");
+const todoList = document.getElementById("todo-list");
 
 function addTodo() {
   const task = todoInput.value.trim();
@@ -190,7 +175,6 @@ function addTodo() {
 }
 
 addTodoBtn.addEventListener("click", addTodo);
-
 todoInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") addTodo();
 });
